@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Clock from "./components/Clock";
+import Navbar from "./components/Navbar";
 import ResetButton from "./components/ResetButton";
 import StartStopButton from "./components/StartStopButton";
 
@@ -48,11 +49,15 @@ export default function App() {
 	}, []);
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen animated-gradient">
-			<Clock time={time} />
-			<div className="flex gap-4 mt-8">
-				<StartStopButton running={running} onClick={toggleClock} />
-				<ResetButton onClick={resetClock} />
+		<div className="min-h-screen animated-gradient">
+			<Navbar />
+			
+			<div className="flex flex-col items-center justify-center mt-22">
+				<Clock time={time} />
+				<div className="flex gap-4 mt-8">
+					<StartStopButton running={running} onClick={toggleClock} />
+					<ResetButton onClick={resetClock} />
+				</div>
 			</div>
 		</div>
 	);

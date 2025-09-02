@@ -17,7 +17,7 @@
 				"height": 400,
 				"resizable": false,
 				"fullscreen": false,
-				"decorations": true,
+				"decorations": false,
 				"visible": true,
 				"maximizable": false
 			}
