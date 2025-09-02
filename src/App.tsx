@@ -49,7 +49,7 @@ export default function App() {
 	}, []);
 
 	return (
-		<div className="min-h-screen animated-gradient">
+		<div className="min-h-screen bg-gray-950">
 			<Navbar />
 			
 			<div className="flex flex-col items-center justify-center mt-22">
