@@ -1,0 +1,37 @@
+{
+	"$schema": "https://schema.tauri.app/config/2",
+	"productName": "modern-clock",
+	"version": "0.1.0",
+	"identifier": "com.tiago.modern-clock",
+	"build": {
+		"beforeDevCommand": "npm run dev",
+		"devUrl": "http://localhost:1420",
+		"beforeBuildCommand": "npm run build",
+		"frontendDist": "../dist"
+	},
+	"app": {
+		"windows": [
+			{
+				"title": "Modern Clock",
+				"width": 400,
+				"height": 400,
+				"resizable": false,
+				"fullscreen": false,
+				"decorations": true,
+				"visible": true,
+				"maximizable": false
+			}
+		],
+		"security": {
+			"csp": null
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"icon": [
+			"icons/icon.ico",
+			"icons/icon.png"
+		]
+	}
+}
