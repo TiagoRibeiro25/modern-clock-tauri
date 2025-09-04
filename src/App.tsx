@@ -7,7 +7,6 @@ import StartStopButton from "./components/StartStopButton";
 import { config, PLAY_ICON, STOP_ICON } from "./config/tray";
 import { formatTime } from "./utils/time";
 
-
 export default function App() {
 	const [time, setTime] = useState<string>("00:00:00");
 	const [running, setRunning] = useState<boolean>(false);
@@ -16,9 +15,7 @@ export default function App() {
 	const trayRef = useRef<TrayIcon | null>(null);
 
 	const updateTrayIcon = async (iconPath: string) => {
-		if (trayRef.current) {
-			await trayRef.current.setIcon(iconPath);
-		}
+		await trayRef.current?.setIcon(iconPath);
 	};
 
 	const toggleClock = async () => {
