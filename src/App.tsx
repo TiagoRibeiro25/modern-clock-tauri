@@ -52,7 +52,6 @@ export default function App() {
 		await store.set("elapsed", state.elapsed);
 		await store.set("running", state.running);
 		await store.set("lastStartAt", state.lastStartAt);
-		// With autoSave: true, no explicit save() needed
 	};
 
 	const startTicking = () => {
@@ -187,15 +186,15 @@ export default function App() {
 	}, []);
 
 	return (
-		<div className="min-h-screen bg-gray-950">
+		<>
 			<Navbar />
-			<div className="flex flex-col items-center justify-center h-[90vh]">
+			<div className="flex flex-col items-center justify-center min-h-screen text-white bg-stone-900">
 				<Clock time={time} />
 				<div className="flex gap-4 mt-8">
 					<StartStopButton running={running} onClick={toggleClock} />
 					<ResetButton onClick={resetClock} />
 				</div>
 			</div>
-		</div>
+		</>
 	);
 }
