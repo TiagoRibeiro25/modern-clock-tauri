@@ -28,7 +28,8 @@
 	},
 	"bundle": {
 		"active": true,
-		"targets": "all",
-		"icon": ["icons/icon.ico", "icons/icon.png"]
+		"targets": "nsis",
+		"icon": ["icons/icon.ico", "icons/icon.png"],
+		"resources": ["icons/"]
 	}
 }

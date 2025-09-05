@@ -5,7 +5,7 @@ import Clock from "./components/Clock";
 import Navbar from "./components/Navbar";
 import ResetButton from "./components/ResetButton";
 import StartStopButton from "./components/StartStopButton";
-import { config, PLAY_ICON, STOP_ICON } from "./config/tray";
+import { config, initIcons, PLAY_ICON, STOP_ICON } from "./config/tray";
 import { formatTime } from "./utils/time";
 
 type TimerState = {
@@ -117,7 +117,10 @@ export default function App() {
 	};
 
 	useEffect(() => {
-		if (initializedRef.current) return;
+		if (initializedRef.current) {
+			return;
+		}
+
 		initializedRef.current = true;
 
 		async function init() {
@@ -131,10 +134,9 @@ export default function App() {
 				} as TimerState,
 			});
 
-			// Init tray once
-			if (!trayRef.current) {
-				trayRef.current = await TrayIcon.new(config);
-			}
+			await initIcons();
+			trayRef.current = await TrayIcon.new(config);
+			console.log("Tray initialized");
 
 			// Restore
 			const savedElapsed = (await store.get<number>("elapsed")) ?? 0;
@@ -160,6 +162,10 @@ export default function App() {
 			setRunning(savedRunning);
 			setTime(formatTime(restored));
 
+			console.log(
+				`State restored: elapsed=${baseElapsedRef.current}, running=${savedRunning}, lastStartAt=${lastStartAtRef.current}`
+			);
+
 			if (savedRunning) {
 				startTicking();
 				await updateTrayIcon(STOP_ICON);
@@ -168,7 +174,11 @@ export default function App() {
 			}
 		}
 
-		init();
+		init()
+			.then(() => console.log("App initialized"))
+			.catch((error) => {
+				console.error("Failed to initialize app:", error);
+			});
 
 		return () => {
 			stopTicking();
