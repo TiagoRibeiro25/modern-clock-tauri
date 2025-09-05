@@ -1,4 +1,5 @@
 import { TrayIcon } from "@tauri-apps/api/tray";
+import { load, type Store } from "@tauri-apps/plugin-store";
 import { useEffect, useRef, useState } from "react";
 import Clock from "./components/Clock";
 import Navbar from "./components/Navbar";
@@ -7,64 +8,171 @@ import StartStopButton from "./components/StartStopButton";
 import { config, PLAY_ICON, STOP_ICON } from "./config/tray";
 import { formatTime } from "./utils/time";
 
+type TimerState = {
+	elapsed: number; // accumulated seconds (not counting current run)
+	running: boolean;
+	lastStartAt: number | null; // epoch ms when the current run started
+};
+
+let store: Store | null = null;
+
 export default function App() {
 	const [time, setTime] = useState<string>("00:00:00");
 	const [running, setRunning] = useState<boolean>(false);
+
+	// Refs for precise control without re-renders
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-	const elapsedRef = useRef<number>(0);
 	const trayRef = useRef<TrayIcon | null>(null);
+	const baseElapsedRef = useRef<number>(0); // seconds accumulated before current run
+	const lastStartAtRef = useRef<number | null>(null); // epoch ms
+	const initializedRef = useRef<boolean>(false); // avoid double init in dev/StrictMode
+
+	const computeElapsedNow = () => {
+		if (lastStartAtRef.current == null) return baseElapsedRef.current;
+		const diffSec = Math.floor(
+			(Date.now() - lastStartAtRef.current) / 1000
+		);
+		return baseElapsedRef.current + Math.max(0, diffSec);
+	};
 
 	const updateTrayIcon = async (iconPath: string) => {
 		await trayRef.current?.setIcon(iconPath);
 	};
 
-	const toggleClock = async () => {
-		if (!running) {
-			intervalRef.current = setInterval(() => {
-				elapsedRef.current += 1;
-				setTime(formatTime(elapsedRef.current));
-			}, 1000);
-
-			await updateTrayIcon(STOP_ICON);
-		} else {
-			if (intervalRef.current) {
-				clearInterval(intervalRef.current);
-				intervalRef.current = null;
-
-				await updateTrayIcon(PLAY_ICON);
-			}
-		}
-		setRunning(!running);
+	const persistState = async (patch?: Partial<TimerState>) => {
+		if (!store) return;
+		// Read current state from refs
+		const state: TimerState = {
+			elapsed: baseElapsedRef.current,
+			running,
+			lastStartAt: lastStartAtRef.current,
+			...patch,
+		};
+		// Write back
+		await store.set("elapsed", state.elapsed);
+		await store.set("running", state.running);
+		await store.set("lastStartAt", state.lastStartAt);
+		// With autoSave: true, no explicit save() needed
 	};
 
-	const resetClock = async () => {
+	const startTicking = () => {
+		// Clear any existing interval just in case
 		if (intervalRef.current) {
 			clearInterval(intervalRef.current);
 			intervalRef.current = null;
 		}
-		elapsedRef.current = 0;
-		setTime("00:00:00");
-		setRunning(false);
+		intervalRef.current = setInterval(() => {
+			const nowElapsed = computeElapsedNow();
+			setTime(formatTime(nowElapsed));
+		}, 1000);
+	};
 
+	const stopTicking = () => {
+		if (intervalRef.current) {
+			clearInterval(intervalRef.current);
+			intervalRef.current = null;
+		}
+	};
+
+	const toggleClock = async () => {
+		if (!running) {
+			// START
+			lastStartAtRef.current = Date.now();
+			setRunning(true);
+			await persistState({
+				running: true,
+				lastStartAt: lastStartAtRef.current,
+			});
+
+			startTicking();
+			setTime(formatTime(computeElapsedNow()));
+			await updateTrayIcon(STOP_ICON);
+		} else {
+			// STOP
+			const finalElapsed = computeElapsedNow();
+			baseElapsedRef.current = finalElapsed;
+			lastStartAtRef.current = null;
+			setRunning(false);
+			stopTicking();
+
+			await persistState({
+				elapsed: baseElapsedRef.current,
+				running: false,
+				lastStartAt: null,
+			});
+
+			setTime(formatTime(baseElapsedRef.current));
+			await updateTrayIcon(PLAY_ICON);
+		}
+	};
+
+	const resetClock = async () => {
+		stopTicking();
+		baseElapsedRef.current = 0;
+		lastStartAtRef.current = null;
+		setRunning(false);
+		setTime("00:00:00");
 		await updateTrayIcon(PLAY_ICON);
+		await persistState({ elapsed: 0, running: false, lastStartAt: null });
 	};
 
 	useEffect(() => {
-		async function initTray() {
-			if (trayRef.current) {
-				console.warn("Tray icon already initialized");
-				return;
+		if (initializedRef.current) return;
+		initializedRef.current = true;
+
+		async function init() {
+			// Load store with required defaults
+			store = await load("timer-state.json", {
+				autoSave: true,
+				defaults: {
+					elapsed: 0,
+					running: false,
+					lastStartAt: null,
+				} as TimerState,
+			});
+
+			// Init tray once
+			if (!trayRef.current) {
+				trayRef.current = await TrayIcon.new(config);
 			}
 
-			trayRef.current = await TrayIcon.new(config);
+			// Restore
+			const savedElapsed = (await store.get<number>("elapsed")) ?? 0;
+			const savedRunning = (await store.get<boolean>("running")) ?? false;
+			const savedLastStartAt =
+				(await store.get<number | null>("lastStartAt")) ?? null;
+
+			baseElapsedRef.current = savedElapsed;
+			lastStartAtRef.current = savedRunning ? savedLastStartAt : null;
+
+			// Get the last elapsed time plus any running time since lastStartAt
+			const restored = savedRunning
+				? baseElapsedRef.current +
+				  Math.max(
+						0,
+						Math.floor(
+							(Date.now() - (savedLastStartAt ?? Date.now())) /
+								1000
+						)
+				  )
+				: baseElapsedRef.current;
+
+			setRunning(savedRunning);
+			setTime(formatTime(restored));
+
+			if (savedRunning) {
+				startTicking();
+				await updateTrayIcon(STOP_ICON);
+			} else {
+				await updateTrayIcon(PLAY_ICON);
+			}
 		}
 
-		initTray();
+		init();
 
 		return () => {
-			if (intervalRef.current) {
-				clearInterval(intervalRef.current);
-			}
+			stopTicking();
+			persistState();
 		};
 	}, []);
 
