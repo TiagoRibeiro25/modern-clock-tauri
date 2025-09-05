@@ -189,8 +189,7 @@ export default function App() {
 	return (
 		<div className="min-h-screen bg-gray-950">
 			<Navbar />
-
-			<div className="flex flex-col items-center justify-center mt-22">
+			<div className="flex flex-col items-center justify-center h-[90vh]">
 				<Clock time={time} />
 				<div className="flex gap-4 mt-8">
 					<StartStopButton running={running} onClick={toggleClock} />

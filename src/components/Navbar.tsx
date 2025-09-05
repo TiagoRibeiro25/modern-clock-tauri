@@ -1,9 +1,20 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { IoMdClose } from "react-icons/io";
-import { VscChromeMinimize } from "react-icons/vsc";
+import { VscChromeMaximize, VscChromeMinimize } from "react-icons/vsc";
 
 export default function Navbar() {
 	const appWindow = getCurrentWindow();
+
+	const handleMaximize = async () => {
+		const isMaximized = await appWindow.isMaximized();
+		console.log("isMaximized:", isMaximized);
+
+		if (isMaximized) {
+			appWindow.unmaximize();
+		} else {
+			appWindow.maximize();
+		}
+	};
 
 	return (
 		<nav className="w-full">
@@ -17,6 +28,14 @@ export default function Navbar() {
 					onClick={() => appWindow.minimize()}
 				>
 					<VscChromeMinimize className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+				</button>
+
+				{/* Maximize Button */}
+				<button
+					className="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+					onClick={handleMaximize}
+				>
+					<VscChromeMaximize className="w-4 h-4 text-gray-600 dark:text-gray-300" />
 				</button>
 
 				{/* Close Button */}

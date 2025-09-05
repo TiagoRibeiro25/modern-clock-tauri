@@ -14,12 +14,13 @@
 			{
 				"title": "Modern Clock",
 				"width": 400,
-				"height": 400,
-				"resizable": false,
+				"height": 420,
+				"minHeight": 420,
+				"minWidth": 300,
+				"resizable": true,
 				"fullscreen": false,
 				"decorations": false,
-				"visible": true,
-				"maximizable": false
+				"visible": true
 			}
 		],
 		"security": {
