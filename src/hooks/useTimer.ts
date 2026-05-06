@@ -37,15 +37,19 @@ export function useTimers() {
 	}, [activeTimerId]);
 
 	const updateActiveTimeStr = () => {
-		const active = timersRef.current.find((t) => t.id === activeTimerIdRef.current);
+		const active = timersRef.current.find(
+			(t) => t.id === activeTimerIdRef.current,
+		);
 		if (!active) {
 			setActiveTimeStr("00:00:00");
 			return;
 		}
-		
+
 		let currentElapsed = active.elapsed;
 		if (active.running && active.lastStartAt) {
-			const diffSec = Math.floor((Date.now() - active.lastStartAt) / 1000);
+			const diffSec = Math.floor(
+				(Date.now() - active.lastStartAt) / 1000,
+			);
 			currentElapsed += Math.max(0, diffSec);
 		}
 		setActiveTimeStr(formatTime(currentElapsed));
@@ -55,7 +59,10 @@ export function useTimers() {
 		await trayRef.current?.setIcon(iconPath);
 	};
 
-	const persistState = async (newTimers: TimerData[], newActiveId: string | null) => {
+	const persistState = async (
+		newTimers: TimerData[],
+		newActiveId: string | null,
+	) => {
 		if (!store) return;
 		await store.set("timers", newTimers);
 		await store.set("activeTimerId", newActiveId);
@@ -88,7 +95,7 @@ export function useTimers() {
 		};
 		const newTimers = [...timers, newTimer];
 		setTimers(newTimers);
-		
+
 		if (!activeTimerId) {
 			setActiveTimerId(newTimer.id);
 			await persistState(newTimers, newTimer.id);
@@ -99,7 +106,7 @@ export function useTimers() {
 
 	const renameTimer = async (id: string, newName: string) => {
 		const updatedTimers = timers.map((t) =>
-			t.id === id ? { ...t, name: newName } : t
+			t.id === id ? { ...t, name: newName } : t,
 		);
 		setTimers(updatedTimers);
 		timersRef.current = updatedTimers;
@@ -145,9 +152,16 @@ export function useTimers() {
 			} else {
 				let finalElapsed = t.elapsed;
 				if (t.lastStartAt) {
-					finalElapsed += Math.floor((Date.now() - t.lastStartAt) / 1000);
+					finalElapsed += Math.floor(
+						(Date.now() - t.lastStartAt) / 1000,
+					);
 				}
-				return { ...t, running: false, lastStartAt: null, elapsed: finalElapsed };
+				return {
+					...t,
+					running: false,
+					lastStartAt: null,
+					elapsed: finalElapsed,
+				};
 			}
 		});
 
@@ -156,7 +170,7 @@ export function useTimers() {
 		updateActiveTimeStr();
 		await persistState(updatedTimers, activeTimerId);
 
-		const activeNow = updatedTimers.find(t => t.id === activeTimerId);
+		const activeNow = updatedTimers.find((t) => t.id === activeTimerId);
 		if (activeNow?.running) {
 			await updateTrayIcon(STOP_ICON);
 		} else {
@@ -184,16 +198,22 @@ export function useTimers() {
 		initializedRef.current = true;
 
 		async function init() {
-			store = await load("timer-state.json", { autoSave: true, defaults: {} });
+			store = await load("timer-state.json", {
+				autoSave: true,
+				defaults: {},
+			});
 
 			// Migrating old state or empty state
 			let savedTimers = (await store.get<TimerData[]>("timers")) ?? [];
-			let savedActiveId = (await store.get<string>("activeTimerId")) ?? null;
+			let savedActiveId =
+				(await store.get<string>("activeTimerId")) ?? null;
 
 			if (!savedTimers || savedTimers.length === 0) {
 				const oldElapsed = (await store.get<number>("elapsed")) ?? 0;
-				const oldRunning = (await store.get<boolean>("running")) ?? false;
-				const oldLastStartAt = (await store.get<number | null>("lastStartAt")) ?? null;
+				const oldRunning =
+					(await store.get<boolean>("running")) ?? false;
+				const oldLastStartAt =
+					(await store.get<number | null>("lastStartAt")) ?? null;
 
 				const defaultTimer: TimerData = {
 					id: Date.now().toString(),
@@ -215,7 +235,7 @@ export function useTimers() {
 			trayRef.current = await TrayIcon.new(config);
 
 			// Check if any timer is running to set correct tray icon
-			const anyRunning = savedTimers.some(t => t.running);
+			const anyRunning = savedTimers.some((t) => t.running);
 			await updateTrayIcon(anyRunning ? STOP_ICON : PLAY_ICON);
 
 			startTicking();
@@ -232,12 +252,12 @@ export function useTimers() {
 		timers,
 		activeTimerId,
 		activeTimeStr,
-		activeTimer: timers.find(t => t.id === activeTimerId),
+		activeTimer: timers.find((t) => t.id === activeTimerId),
 		addTimer,
 		renameTimer,
 		deleteTimer,
 		selectTimer,
 		toggleActiveClock,
-		resetActiveClock
+		resetActiveClock,
 	};
 }

@@ -28,7 +28,10 @@ export default function App() {
 
 	return (
 		<>
-			<Navbar onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
+			<Navbar
+				onToggleSidebar={toggleSidebar}
+				isSidebarOpen={isSidebarOpen}
+			/>
 			<div className="flex h-screen text-white bg-stone-900 pt-10 overflow-hidden">
 				<Sidebar
 					timers={timers}
@@ -47,12 +50,17 @@ export default function App() {
 							</h1>
 							<Clock time={activeTimeStr} />
 							<div className="flex gap-4 mt-8">
-								<StartStopButton running={activeTimer.running} onClick={toggleActiveClock} />
+								<StartStopButton
+									running={activeTimer.running}
+									onClick={toggleActiveClock}
+								/>
 								<ResetButton onClick={resetActiveClock} />
 							</div>
 						</>
 					) : (
-						<p className="text-stone-500">Select or create a clock to begin.</p>
+						<p className="text-stone-500">
+							Select or create a clock to begin.
+						</p>
 					)}
 				</div>
 			</div>

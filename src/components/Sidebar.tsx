@@ -42,9 +42,9 @@ export default function Sidebar({
 
 	return (
 		<div
-			className={`bg-stone-800 p-4 flex flex-col border-r border-stone-700 transition-all duration-300 ${
+			className={`bg-stone-800 flex flex-col border-r border-stone-700 transition-all duration-300 overflow-hidden shrink-0 ${
 				isSidebarOpen
-					? "w-64 translate-x-0"
+					? "w-full sm:w-64 p-4 translate-x-0"
 					: "w-0 p-0 opacity-0 -translate-x-full border-none"
 			}`}
 		>
@@ -68,7 +68,8 @@ export default function Sidebar({
 								onChange={(e) => setEditingName(e.target.value)}
 								onBlur={() => handleRenameSave(timer.id)}
 								onKeyDown={(e) => {
-									if (e.key === "Enter") handleRenameSave(timer.id);
+									if (e.key === "Enter")
+										handleRenameSave(timer.id);
 									if (e.key === "Escape") setEditingId(null);
 								}}
 								className="bg-stone-800 text-white px-2 py-1 rounded outline-none w-full text-sm focus:ring-2 focus:ring-blue-400"
@@ -76,7 +77,9 @@ export default function Sidebar({
 						) : (
 							<>
 								<div className="flex-1 truncate mr-2 flex items-center gap-2">
-									<span className="truncate">{timer.name}</span>
+									<span className="truncate">
+										{timer.name}
+									</span>
 									{timer.running && (
 										<span className="w-2 h-2 bg-green-500 rounded-full shrink-0"></span>
 									)}
@@ -110,7 +113,10 @@ export default function Sidebar({
 				))}
 			</div>
 
-			<form onSubmit={handleAddTimer} className="mt-4 flex flex-col gap-2">
+			<form
+				onSubmit={handleAddTimer}
+				className="mt-4 flex flex-col gap-2"
+			>
 				<input
 					type="text"
 					placeholder="New clock name..."
