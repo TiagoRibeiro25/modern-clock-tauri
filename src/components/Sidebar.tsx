@@ -55,7 +55,7 @@ export default function Sidebar({
 						key={timer.id}
 						className={`w-full flex items-center justify-between px-3 py-2 rounded transition-colors group cursor-pointer ${
 							timer.id === activeTimerId
-								? "bg-blue-600 text-white"
+								? "bg-accent text-white"
 								: "bg-stone-700 hover:bg-stone-600"
 						}`}
 						onClick={() => onSelectTimer(timer.id)}
@@ -71,7 +71,7 @@ export default function Sidebar({
 									if (e.key === "Enter") handleRenameSave(timer.id);
 									if (e.key === "Escape") setEditingId(null);
 								}}
-								className="bg-stone-800 text-white px-2 py-1 rounded outline-none w-full text-sm focus:ring-2 focus:ring-blue-400"
+								className="bg-stone-800 text-white px-2 py-1 rounded outline-none w-full text-sm focus:ring-2 focus:ring-accent/50"
 							/>
 						) : (
 							<>
@@ -116,12 +116,12 @@ export default function Sidebar({
 					placeholder="New clock name..."
 					value={newTimerName}
 					onChange={(e) => setNewTimerName(e.target.value)}
-					className="bg-stone-700 text-white px-3 py-2 rounded outline-none focus:ring-2 focus:ring-blue-500"
+					className="bg-stone-700 text-white px-3 py-2 rounded outline-none focus:ring-2 focus:ring-accent/50"
 				/>
 				<button
 					type="submit"
 					disabled={!newTimerName.trim()}
-					className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 rounded transition-colors"
+					className="bg-accent hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 rounded transition-colors"
 				>
 					Add Clock
 				</button>
