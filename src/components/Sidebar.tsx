@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { VscEdit, VscTrash } from "react-icons/vsc";
+import { VscEdit, VscTrash, VscSettingsGear } from "react-icons/vsc";
 import type { TimerData } from "../hooks/useTimer";
+import { useSettings } from "../hooks/useSettings";
 
 interface SidebarProps {
 	timers: TimerData[];
@@ -10,6 +11,7 @@ interface SidebarProps {
 	onAddTimer: (name: string) => void;
 	onRenameTimer: (id: string, newName: string) => void;
 	onDeleteTimer: (id: string) => void;
+	onOpenSettings: () => void;
 }
 
 export default function Sidebar({
@@ -20,10 +22,13 @@ export default function Sidebar({
 	onAddTimer,
 	onRenameTimer,
 	onDeleteTimer,
+	onOpenSettings,
 }: SidebarProps) {
 	const [newTimerName, setNewTimerName] = useState("");
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [editingName, setEditingName] = useState("");
+
+	const { buttonColor } = useSettings();
 
 	const handleAddTimer = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -55,9 +60,10 @@ export default function Sidebar({
 						key={timer.id}
 						className={`w-full flex items-center justify-between px-3 py-2 rounded transition-colors group cursor-pointer ${
 							timer.id === activeTimerId
-								? "bg-blue-600 text-white"
+								? "text-white"
 								: "bg-stone-700 hover:bg-stone-600"
 						}`}
+						style={timer.id === activeTimerId ? { backgroundColor: buttonColor } : undefined}
 						onClick={() => onSelectTimer(timer.id)}
 					>
 						{editingId === timer.id ? (
@@ -127,11 +133,22 @@ export default function Sidebar({
 				<button
 					type="submit"
 					disabled={!newTimerName.trim()}
-					className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 rounded transition-colors"
+					style={{ backgroundColor: buttonColor }}
+					className="hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 rounded transition-all"
 				>
 					Add Clock
 				</button>
 			</form>
+
+			<div className="mt-2 pt-2 border-t border-stone-700">
+				<button
+					onClick={onOpenSettings}
+					className="w-full flex items-center justify-center gap-2 text-stone-300 hover:text-white bg-stone-700/50 hover:bg-stone-700 py-2 rounded transition-colors"
+				>
+					<VscSettingsGear className="w-4 h-4" />
+					<span>Settings</span>
+				</button>
+			</div>
 		</div>
 	);
 }

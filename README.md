@@ -17,9 +17,9 @@ Just a simple stopwatch app made with Tauri and React.
 
 1. Clone the repository:
 
-   ```bash
-   git clone https://github.com/TiagoRibeiro25/modern-clock-tauri.git
-    cd modern-clock-tauri
+    ```bash
+     git clone https://github.com/TiagoRibeiro25/modern-clock-tauri.git
+     cd modern-clock-tauri
     ```
 
 2. Install dependencies:
@@ -28,7 +28,7 @@ Just a simple stopwatch app made with Tauri and React.
     npm install
     ```
 
-3. Run the app in development mode:
+3. Run the app in development mode (export export WEBKIT_DISABLE_DMABUF_RENDERER=1 on linux with wayland):
 
     ```bash
     npm run tauri dev
