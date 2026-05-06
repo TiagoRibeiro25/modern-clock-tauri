@@ -13,10 +13,10 @@
 		"windows": [
 			{
 				"title": "Modern Clock",
-				"width": 400,
-				"height": 420,
-				"minHeight": 240,
-				"minWidth": 300,
+				"width": 800,
+				"height": 600,
+				"minHeight": 400,
+				"minWidth": 650,
 				"resizable": true,
 				"fullscreen": false,
 				"decorations": false,
