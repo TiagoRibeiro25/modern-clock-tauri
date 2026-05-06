@@ -97,6 +97,39 @@ export function useTimers() {
 		}
 	};
 
+	const renameTimer = async (id: string, newName: string) => {
+		const updatedTimers = timers.map((t) =>
+			t.id === id ? { ...t, name: newName } : t
+		);
+		setTimers(updatedTimers);
+		timersRef.current = updatedTimers;
+		await persistState(updatedTimers, activeTimerId);
+	};
+
+	const deleteTimer = async (id: string) => {
+		const updatedTimers = timers.filter((t) => t.id !== id);
+		let newActiveId = activeTimerId;
+
+		if (id === activeTimerId) {
+			newActiveId = updatedTimers.length > 0 ? updatedTimers[0].id : null;
+		}
+
+		setTimers(updatedTimers);
+		timersRef.current = updatedTimers;
+		setActiveTimerId(newActiveId);
+		activeTimerIdRef.current = newActiveId;
+
+		updateActiveTimeStr();
+		await persistState(updatedTimers, newActiveId);
+
+		const activeNow = updatedTimers.find((t) => t.id === newActiveId);
+		if (activeNow?.running) {
+			await updateTrayIcon(STOP_ICON);
+		} else {
+			await updateTrayIcon(PLAY_ICON);
+		}
+	};
+
 	const selectTimer = async (id: string) => {
 		setActiveTimerId(id);
 		await persistState(timers, id);
@@ -201,6 +234,8 @@ export function useTimers() {
 		activeTimeStr,
 		activeTimer: timers.find(t => t.id === activeTimerId),
 		addTimer,
+		renameTimer,
+		deleteTimer,
 		selectTimer,
 		toggleActiveClock,
 		resetActiveClock
