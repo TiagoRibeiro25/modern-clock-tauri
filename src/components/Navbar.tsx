@@ -55,7 +55,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }: NavbarProps) 
 					onClick={toggleAlwaysOnTop}
 					title="Always on Top"
 				>
-					<VscPin className={`w-4 h-4 ${isAlwaysOnTop ? "text-accent" : "text-gray-600 dark:text-gray-300"}`} />
+					<VscPin className={`w-4 h-4 ${isAlwaysOnTop ? "text-blue-500" : "text-gray-600 dark:text-gray-300"}`} />
 				</button>
 
 				{/* Minimize Button */}
