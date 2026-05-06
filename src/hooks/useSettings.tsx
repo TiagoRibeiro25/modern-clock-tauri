@@ -16,18 +16,29 @@ interface SettingsContextType extends Settings {
 	resetSettings: () => Promise<void>;
 }
 
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+async function saveSettings(settings: Settings) {
+	const store = await load("settings.json", { autoSave: true, defaults: {} });
+	await store.set("settings", settings);
+	await store.save();
+}
+
+async function loadSettings(): Promise<Settings> {
+	const store = await load("settings.json", { autoSave: true, defaults: {} });
+	const saved = await store.get<Settings>("settings");
+	return { ...DEFAULT_SETTINGS, ...saved };
+}
+
+const SettingsContext = createContext<SettingsContextType | undefined>(
+	undefined,
+);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
 	const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
 
 	useEffect(() => {
 		async function init() {
-			const store = await load("settings.json", { autoSave: true, defaults: {} });
-			const saved = await store.get<Settings>("settings");
-			if (saved) {
-				setSettings({ ...DEFAULT_SETTINGS, ...saved });
-			}
+			const loadedSettings = await loadSettings();
+			setSettings(loadedSettings);
 		}
 		init().catch(console.error);
 	}, []);
@@ -35,20 +46,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 	const updateSettings = async (newSettings: Partial<Settings>) => {
 		const updated = { ...settings, ...newSettings };
 		setSettings(updated);
-		const store = await load("settings.json", { autoSave: true, defaults: {} });
-		await store.set("settings", updated);
-		await store.save();
+		await saveSettings(updated);
 	};
 
 	const resetSettings = async () => {
 		setSettings(DEFAULT_SETTINGS);
-		const store = await load("settings.json", { autoSave: true, defaults: {} });
-		await store.set("settings", DEFAULT_SETTINGS);
-		await store.save();
+		await saveSettings(DEFAULT_SETTINGS);
 	};
 
 	return (
-		<SettingsContext.Provider value={{ ...settings, updateSettings, resetSettings }}>
+		<SettingsContext.Provider
+			value={{ ...settings, updateSettings, resetSettings }}
+		>
 			{children}
 		</SettingsContext.Provider>
 	);
@@ -56,6 +65,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
 export function useSettings() {
 	const context = useContext(SettingsContext);
-	if (!context) throw new Error("useSettings must be used within SettingsProvider");
+	if (!context)
+		throw new Error("useSettings must be used within SettingsProvider");
 	return context;
 }
