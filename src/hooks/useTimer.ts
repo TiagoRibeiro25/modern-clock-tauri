@@ -184,11 +184,11 @@ export function useTimers() {
 		initializedRef.current = true;
 
 		async function init() {
-			store = await load("timer-state.json", { autoSave: true });
+			store = await load("timer-state.json", { autoSave: true, defaults: {} });
 
 			// Migrating old state or empty state
-			let savedTimers = await store.get<TimerData[]>("timers");
-			let savedActiveId = await store.get<string | null>("activeTimerId");
+			let savedTimers = (await store.get<TimerData[]>("timers")) ?? [];
+			let savedActiveId = (await store.get<string>("activeTimerId")) ?? null;
 
 			if (!savedTimers || savedTimers.length === 0) {
 				const oldElapsed = (await store.get<number>("elapsed")) ?? 0;
